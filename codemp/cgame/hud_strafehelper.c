@@ -1353,8 +1353,26 @@ float DF_GetWishspeed(const usercmd_t inCmd) {
 	}
 	wishvel[2] = 0; //wishdir
 	float wishspeed = VectorNormalize(wishvel);
-	if (state.moveStyle == MV_OCPM || state.moveStyle == MV_SP)
+	if (DF_StyleUsesCmdScale())
 		wishspeed *= DF_GetCmdScale(inCmd);
+	else
+		wishspeed = state.speed; //magnitude * PM_CmdScale always cancels to ps->speed for full presses
+
+	//air control styles cap wishspeed when using A or D only in the air (includes OCPM)
+	if (!state.cgaz.groundMove && state.physics.hasAirControl &&
+		wishspeed > state.physics.airstrafewishspeed && fmove == 0 && smove != 0) {
+		wishspeed = state.physics.airstrafewishspeed;
+	}
+
+	if (state.moveStyle == MV_SURF) {
+		if (!state.cgaz.groundMove) {
+			//PM_AirMove never cmd-scales surf, and PM_CS_AirAccelerate caps the addspeed threshold at 30
+			wishspeed = 30.0f;
+		}
+		else if (wishspeed > pm_surf_wishspeed) {
+			wishspeed = pm_surf_wishspeed; //PM_WalkMove cap
+		}
+	}
 
 	if (state.pm_type == PM_JETPACK) {
 		if (inCmd.upmove <= 0)
@@ -1371,15 +1389,6 @@ float DF_GetWishspeed(const usercmd_t inCmd) {
 		}
 	}
 
-	if (state.moveStyle != MV_SP && state.moveStyle != MV_OCPM) {
-		wishspeed = state.speed; //this seems more accurate than using scale?
-		//air control has a different wishspeed when using A or D only in the air
-		if (!state.cgaz.groundMove && state.physics.hasAirControl &&
-			wishspeed > state.physics.airstrafewishspeed && fmove == 0 && smove != 0) {
-			wishspeed = state.physics.airstrafewishspeed;
-		}
-	}
-
 	if (state.cgaz.groundMove && inCmd.upmove < 0) {
 		const float duckWishspeed = state.speed * state.physics.duckscale;
 
@@ -1388,16 +1397,16 @@ float DF_GetWishspeed(const usercmd_t inCmd) {
 		}
 	}
 
-	//SP only applies the scale when on the ground and also encourages deceleration away from current velocity
-	if (state.moveStyle == MV_SP) {
+	//SP encourages deceleration away from current velocity, air only (PM_AirMove)
+	if (state.moveStyle == MV_SP && !state.cgaz.groundMove) {
 		if (DotProduct(state.velocity, wishvel) < 0.0f) {
 			wishspeed *= state.physics.airdecelrate;
 		}
 	}
 
-	if (state.moveStyle == MV_SP && !state.cgaz.groundMove) {
-		if (DotProduct(state.velocity, wishvel) < 0.0f) {
-			wishspeed *= state.physics.airdecelrate;
+	if (state.moveStyle == MV_QW && !state.cgaz.groundMove) {
+		if (wishspeed > pm_qw_airstrafewishspeed) {
+			wishspeed = pm_qw_airstrafewishspeed;
 		}
 	}
 	return wishspeed;
@@ -1408,7 +1417,7 @@ float DF_GetCmdScale(const usercmd_t cmd) {
 	signed char		umove = 0; //cmd->upmove;
 	//don't factor upmove into scaling speed
 
-	if (state.moveStyle == MV_OCPM || state.moveStyle == MV_SP) { // velocity upmove scaling
+	if (DF_StyleUsesCmdScale()) { //upmove velocity scaling
 		umove = cmd.upmove;
 	}
 	int max = abs(cmd.forwardmove);
