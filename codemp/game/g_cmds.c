@@ -4875,11 +4875,20 @@ void Cmd_SayTeamMod_f(gentity_t *ent)//clanpass
 	}
 	if (trap->Argc() == 2) {
 		if (!Q_stricmp(type, "normal"))
+		{
+			Com_Printf("Changing team chat to mode : ^7normal\n");
 			ent->client->sess.sayteammod = 0;
+		}
 		else if (!Q_stricmp(type, "clan"))
+		{
+			Com_Printf("Changing team chat to mode : ^7clan\n");
 			ent->client->sess.sayteammod = 1;
+		}
 		else if (!Q_stricmp(type, "admin"))
+		{
+			Com_Printf("Changing team chat to mode : ^7admin\n");
 			ent->client->sess.sayteammod = 2;
+		}
 	}
 }
 

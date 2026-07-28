@@ -1666,6 +1666,94 @@ static void CG_Print_f( void ) {
 		CG_LogPrintf(cg.log.file, "%s\n", strEd); //Log server console prints?
 }
 
+
+// Variables that hold the information, initialized when calling the funciton for the first time and needs a reboot to reload the file
+#define MAX_BAN_WORDS     128
+#define MAX_BAN_WORD_LEN  32
+static char banWords[MAX_BAN_WORDS][MAX_BAN_WORD_LEN];
+static int numBanWords = 0;
+static qboolean banWordArrayReady = qfalse;
+
+// Heavily inspired by FS_ReadFile
+static void CG_LoadBanWords(void)
+{
+	fileHandle_t file;
+	int length;
+	char buffer[8192];
+	char* ptr;
+	char* line;
+
+	if (banWordArrayReady)
+		return;
+
+	length = trap->FS_Open("banwords.txt", &file, FS_READ);
+
+	if (!file || length <= 0) // File don't exist or in bad folder (base INSIDE Debug, not only base in the git repo)
+		return;
+
+	trap->FS_Read(buffer, length, file);
+	trap->FS_Close(file);
+
+	// guarantee that it will have a trailing 0 for string operations
+	buffer[length] = 0;
+
+	ptr = buffer;
+
+	// COM_ParseString copy : if COM_ParseExt returns nothing, then we have ended the buffer
+	while ((line = COM_ParseExt(&ptr, qtrue)) != NULL && line[0]) // If qfalse, it only reads the first line, different than COM_ParseString
+	{
+		if (numBanWords >= MAX_BAN_WORDS)
+			break;
+
+		Q_strncpyz(banWords[numBanWords], line, MAX_BAN_WORD_LEN);
+		numBanWords++;
+	}
+
+	banWordArrayReady = qtrue;
+}
+static void CG_Chat_CheckBanWord(char* text)
+{
+	CG_LoadBanWords();
+
+	for (int i = 0; i < numBanWords; i++)
+	{
+		// Q_stristr because it musn't be case sensitive, people will write as they wish on the .txt
+		// Else I would have used strstr again
+		char* match = Q_stristr(text, banWords[i]);
+
+		while (match) // Found a match in the current word of the list !
+		{
+			int len = strlen(banWords[i]);
+
+			for (int j = 0; j < len; j++)
+				match[j] = '*';
+
+			match = Q_stristr(match + len, banWords[i]); // Recheck if the same word is present multiple times
+		}
+	}
+}
+
+static void CG_Chat_CheckDisabled(char* cmd, char* text)
+{
+	// Same size as text
+	char* textToDisplay[MAX_NETNAME + MAX_SAY_TEXT] = { 0 };
+
+	// Clan : cmd : chat  ; message : ^1<Clan>^7(Posto^7): ^1co
+	// Team : cmd : tchat ; message : (Posto^7): ^5to
+	// All :  cmd : chat  ; message : Posto^7: ^2yo
+	// Whispers are considered "all chat" when hitting this function, only change is color and the server choosing to whom to deliver them
+
+	if (cg_chatDisableClan.integer && Q_stricmp(cmd, "chat") == 0 && strstr(text, "<Clan>") != NULL	||  // If it's a clan chat
+		cg_chatDisableTeam.integer && Q_stricmp(cmd, "tchat") == 0									||	// If it's a team chat
+		cg_chatDisableAll.integer && Q_stricmp(cmd, "chat") == 0 && strstr(text, "<Clan>") == NULL	)	// If it's a all chat
+	{
+		Q_strncpyz(textToDisplay, "", sizeof(textToDisplay));
+		strcpy(text, textToDisplay);
+	}
+
+	return;
+}
+
 void CG_ChatBox_AddString(char *chatStr);
 static void CG_Chat_f( void ) {
 	char cmd[MAX_STRING_CHARS] = {0}, text[MAX_NETNAME+MAX_SAY_TEXT] = {0}, logtext[MAX_NETNAME+MAX_SAY_TEXT] = {0};
@@ -1679,6 +1767,9 @@ static void CG_Chat_f( void ) {
 		if ( !Q_stricmp( cmd, "chat" ) && !cg_teamChatsOnly.integer )
 		{
 			CG_RemoveChatEscapeChar( text );
+
+			CG_Chat_CheckDisabled(cmd, text);
+			CG_Chat_CheckBanWord(text);
 
 			if (cg_cleanChatbox.integer) {
 				char cleanMsg[MAX_NETNAME + MAX_SAY_TEXT];
@@ -1717,6 +1808,9 @@ static void CG_Chat_f( void ) {
 		{
 			CG_RemoveChatEscapeChar( text );
 
+			CG_Chat_CheckDisabled(cmd, text);
+			CG_Chat_CheckBanWord(text);
+
 			if (cg_cleanChatbox.integer && !Q_strncmp(text, cg.lastChatMsg, strlen(text))) {//Same exact msg/sender as previous //replace this with q_strcmp in entire function..?
 				return;
 			}
@@ -1751,11 +1845,15 @@ static void CG_Chat_f( void ) {
 		if ( !Q_stricmp( cmd, "lchat" ) && !cg_teamChatsOnly.integer ) {
 			Com_sprintf( text, sizeof( text ), "%s" S_COLOR_WHITE "<%s> ^%s%s", name, loc, color, message );
 			CG_RemoveChatEscapeChar( text );
+			CG_Chat_CheckDisabled(cmd, text);
+			CG_Chat_CheckBanWord(text);
 			CG_ChatBox_AddString( text );
 		}
 		else if ( !Q_stricmp( cmd, "ltchat" ) ) {
 			Com_sprintf( text, sizeof( text ), "%s" S_COLOR_WHITE "<%s> ^%s%s", name, loc, color, message );
 			CG_RemoveChatEscapeChar( text );
+			CG_Chat_CheckDisabled(cmd, text);
+			CG_Chat_CheckBanWord(text);
 			CG_ChatBox_AddString( text );
 		}
 	}

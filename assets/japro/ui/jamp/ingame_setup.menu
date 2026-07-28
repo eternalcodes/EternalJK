@@ -4533,6 +4533,114 @@
 			mouseenter			{ show highlight9 }
 			mouseexit			{ hide highlight9 }
 		}
+		
+		itemDef 
+		{	
+			name				chatdisableteam
+			group				network
+			type				ITEM_TYPE_MULTI
+			text				"Disable the 'team' chat"
+			descText			"Disable the 'team' chat"
+			cvar				"cg_chatdisableTeam"
+			cvarFloatList		
+			{ 
+				@MENUS_OFF 			0
+				@MENUS_ON  			1
+			}
+			rect				230 243 300 20
+	   		textalign			ITEM_ALIGN_RIGHT
+			textalignx			165
+			textaligny			0
+			font 				4
+			textscale 			1
+			forecolor		.615 .615 .956 1
+			visible			0
+
+			action
+			{
+				play			"sound/interface/button1.wav"
+			}
+			mouseenter 
+			{ 
+				show			highlight11
+			}
+			mouseexit 
+			{ 
+				hide			highlight11
+			} 
+		}
+
+		itemDef 
+		{	
+			name				chatdisableall
+			group				network
+			type				ITEM_TYPE_MULTI
+			text				"Disable the 'all' chat"
+			descText			"Disable the 'all' chat and whispers"
+			cvar				"cg_chatdisableAll"
+			cvarFloatList		
+			{ 
+				@MENUS_OFF 			0
+				@MENUS_ON  			1
+			}
+			rect				230 263 300 20
+	   		textalign			ITEM_ALIGN_RIGHT
+			textalignx			165
+			textaligny			0
+			font 				4
+			textscale 			1
+			forecolor		.615 .615 .956 1
+			visible			0
+
+			action
+			{
+				play			"sound/interface/button1.wav"
+			}
+			mouseenter 
+			{ 
+				show			highlight12
+			}
+			mouseexit 
+			{ 
+				hide			highlight12
+			} 
+		}
+
+		itemDef 
+		{	
+			name				chatdisableclan
+			group				network
+			type				ITEM_TYPE_MULTI
+			text				"Disable the 'clan' chat"
+			descText			"Disable the 'clan' chat"
+			cvar				"cg_chatdisableClan"
+			cvarFloatList		
+			{ 
+				@MENUS_OFF 			0
+				@MENUS_ON  			1
+			}
+			rect				230 283 300 20
+	   		textalign			ITEM_ALIGN_RIGHT
+			textalignx			165
+			textaligny			0
+			font 				4
+			textscale 			1
+			forecolor		.615 .615 .956 1
+			visible			0
+
+			action
+			{
+				play			"sound/interface/button1.wav"
+			}
+			mouseenter 
+			{ 
+				show			highlight13
+			}
+			mouseexit 
+			{ 
+				hide			highlight13
+			} 
+		}
 
 		// APPLY CHANGES BUTTON
 		itemDef
