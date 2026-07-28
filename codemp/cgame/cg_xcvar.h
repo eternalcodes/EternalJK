@@ -379,6 +379,10 @@ XCVAR_DEF( ui_tm2_c4_cnt,						"0",					NULL,					CVAR_ROM|CVAR_INTERNAL )
 XCVAR_DEF( ui_tm2_c5_cnt,						"0",					NULL,					CVAR_ROM|CVAR_INTERNAL )
 XCVAR_DEF( ui_tm2_cnt,							"0",					NULL,					CVAR_ROM|CVAR_INTERNAL )
 XCVAR_DEF( ui_tm3_cnt,							"0",					NULL,					CVAR_ROM|CVAR_INTERNAL )
+// Chat related variables
+XCVAR_DEF(cg_chatDisableClan,					"0",					NULL,					CVAR_ARCHIVE)
+XCVAR_DEF(cg_chatDisableAll,					"0",					NULL,					CVAR_ARCHIVE)
+XCVAR_DEF(cg_chatDisableTeam,					"0",					NULL,					CVAR_ARCHIVE) // Redundant because of cg_teamChatsOnly ?
 
 
 #undef XCVAR_DEF
