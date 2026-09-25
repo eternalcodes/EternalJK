@@ -59,9 +59,9 @@ float RandFloat( float min, float max ) {
 #ifdef _WIN32
 	if ( g_randFix.integer == 2 )
 		randActual = (randActual<<16)|randActual;
-#elif defined(__GCC__)
+#elif defined(__GNUC__)
 	if ( g_randFix.integer == 1 )
-		randMax = RAND_MAX;
+		randMax = (float)RAND_MAX + 1.0f;
 #endif
 	return ((randActual * (max - min)) / randMax) + min;
 }

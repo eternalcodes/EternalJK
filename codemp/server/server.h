@@ -359,7 +359,7 @@ extern	int serverBansCount;
 #define SVFIXES_DISABLE_GC_CRASHFIX				(1<<10)
 #define SVFIXES_ALLOW_CALLTEAMVOTE				(1<<11)
 #define SVFIXES_ALLOW_NEGATIVE_CALLVOTES		(1<<12) //negative fraglimit/timelimit callvotes
-#define SVFIXES_DISABLE_SPEC_ALTFIRE_FOLLOWPREV	(1<<12) //disables engine-side spectator alt-fire=followPrev feature
+#define SVFIXES_DISABLE_SPEC_ALTFIRE_FOLLOWPREV	(1<<13) //disables engine-side spectator alt-fire=followPrev feature
 
 //
 // sv_main.c

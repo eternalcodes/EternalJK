@@ -2874,7 +2874,7 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 	if ( !isBot && firstTime )
 	{
 		if ( g_antiFakePlayer.integer )
-		{// patched, check for > g_maxConnPerIP connections from same IP
+		{// patched, refuse once g_maxConnPerIP clients from this IP are already connected
 			int count=0, i=0;
 			for ( i=0; i<sv_maxclients.integer; i++ )
 			{
@@ -2892,11 +2892,12 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 						}
 					}
 				#else
-					if ( CompareIPs( tmpIP, level.clients[i].sess.IP ) )
+					// count other slots that are still connected: a disconnected slot keeps its old IP until reused
+					if ( i != clientNum && level.clients[i].pers.connected != CON_DISCONNECTED && CompareIPs( tmpIP, level.clients[i].sess.IP ) )
 						count++;
 				#endif
 			}
-			if ( count > g_maxConnPerIP.integer ) //>= ?
+			if ( count >= Q_max( g_maxConnPerIP.integer, 1 ) )
 			{
 			//	client->pers.connected = CON_DISCONNECTED;
 				//trap->Print("Too may connections\n");

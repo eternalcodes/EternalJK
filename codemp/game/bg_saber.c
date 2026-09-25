@@ -2636,7 +2636,7 @@ saberMoveName_t PM_SaberAttackForMovement(saberMoveName_t curmove)
 #ifdef _GAME
 				(!(g_tweakSaber.integer & ST_JK2RDFA) || pm->ps->stats[STAT_RACEMODE])
 #else
-				((cgs.serverMod == SVMOD_JAPRO && (!(cgs.jcinfo & JAPRO_CINFO_JK2DFA) || pm->ps->stats[STAT_RACEMODE])) || (cgs.serverMod == SVMOD_JAPLUS && !(cgs.jcinfo & JAPLUS_CINFO_JK2DFA)) || cgs.serverMod < SVMOD_JAPLUS)
+				((cgs.serverMod == SVMOD_JAPRO && (!(cgs.jcinfo & JAPRO_CINFO_JK2DFA) || pm->ps->stats[STAT_RACEMODE])) || (cgs.serverMod == SVMOD_JAPLUS && !(cgs.cinfo & JAPLUS_CINFO_JK2DFA)) || cgs.serverMod < SVMOD_JAPLUS)
 #endif
 				&& !noSpecials&&
 				pm->ps->fd.saberAnimLevel == SS_STRONG &&
@@ -2665,7 +2665,7 @@ saberMoveName_t PM_SaberAttackForMovement(saberMoveName_t curmove)
 #ifdef _GAME
 				((g_tweakSaber.integer & ST_JK2RDFA) && !pm->ps->stats[STAT_RACEMODE])
 #else
-				((cgs.serverMod == SVMOD_JAPRO && !pm->ps->stats[STAT_RACEMODE] && (cgs.jcinfo & JAPRO_CINFO_JK2DFA)) || (cgs.serverMod == SVMOD_JAPLUS && (cgs.jcinfo & JAPLUS_CINFO_JK2DFA)))
+				((cgs.serverMod == SVMOD_JAPRO && !pm->ps->stats[STAT_RACEMODE] && (cgs.jcinfo & JAPRO_CINFO_JK2DFA)) || (cgs.serverMod == SVMOD_JAPLUS && (cgs.cinfo & JAPLUS_CINFO_JK2DFA)))
 #endif
 				&& !noSpecials && //JAPRO, JK2 RED DFA
 				pm->ps->fd.saberAnimLevel == SS_STRONG &&
